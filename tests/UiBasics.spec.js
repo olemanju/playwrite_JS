@@ -18,7 +18,7 @@ test('first test case', async ({browser})=>{
 }) 
 
 //this methods will work without context details
-test.only('ThSecondird test case', async ({page})=>{
+test('ThSecondird test case', async ({page})=>{
 
     var url ="https://rahulshettyacademy.com/loginpagePractise/";
     //To launchthe URL
@@ -62,7 +62,7 @@ test.only('ThSecondird test case', async ({page})=>{
     })      
 
     //this methods will work without context details
-test.only('Third test case to print all the links', async ({page})=>{
+test('Third test case to print all the links', async ({page})=>{
 
     var url ="https://rahulshettyacademy.com/loginpagePractise/";
     //To launchthe URL
@@ -76,7 +76,8 @@ test.only('Third test case to print all the links', async ({page})=>{
     //type is used instead of sendkeys
     await page.locator('#username').type("rahulshettyacademy1")
     await page.locator('#password').type("learning")
-    await page.locator("#signInBtn").click()
+    const signinbutton=page.locator("input#signInBtn");
+    await signinbutton.click()
     //Actually it will take more time see this message
     //but play wright is cleaver enough to handle this
     //textContent is used for gettext()
@@ -94,8 +95,138 @@ test.only('Third test case to print all the links', async ({page})=>{
 
     //Next page
 
+    var newurl ="https://rahulshettyacademy.com/angularpractice/shop"
+    //race condition
+    await Promise.all([
+   // page.waitForNavigation(),
+    page.waitForURL(newurl),
+    signinbutton.click(),
+  ]);
     const productsnames =  page.locator(".card-body a")
+
+    //fetching text of all the locators
+    const titles= await productsnames.allTextContents();
+    console.log(titles);
 
    
 
     })      
+
+
+    test('Fourth case - to verify UI controls', async ({page})=>{
+
+        var url ="https://rahulshettyacademy.com/loginpagePractise/";
+        //To launchthe URL
+        await page.goto(url)
+    
+        var titlepage = "LoginPage Practise | Rahul Shetty Academy"
+        //User assertions to verify the title
+        await expect(page).toHaveTitle(titlepage)
+        
+        //page.locator we use instead of $ or driver.findelementby
+        //type is used instead of sendkeys
+        await page.locator('#username').type("rahulshettyacademy1")
+        await page.locator('#password').type("learning")
+
+        //Radio button
+        const radiobutton = page.locator("span.checkmark")
+        //Drop down
+        const dropdown = page.locator("select,form-control")
+
+        //to select the last radio button
+        await radiobutton.last().click()
+
+        //tocheck the radio button is checked
+        expect( await radiobutton.last()).toBeChecked()
+
+        //select the dropdowm using the label value.
+        await dropdown.selectOption({label:'Teacher'})
+        // Alert message 
+        const popMessage = page.locator("div[class='modal-body'] p")
+
+        //get the text and print them
+        console.log(await popMessage.textContent())
+        await expect(popMessage).toHaveText("You will be limited to only fewer functionalities of the app. Proceed?")
+       
+        //Okey button from the popup
+        const okeybutton = page.locator("#okayBtn")
+
+        //Click on Okey button
+        await okeybutton.click()
+
+        const checkbox = page.locator("#terms")
+        //To check check box selected is false
+        expect(await checkbox.isChecked()).toBeFalsy()
+         //select the check box
+        await checkbox.click()
+        // Check the check box is selected is true
+        expect(await page.locator("#terms").isChecked()).toBeTruthy()
+
+       // to verify the class attribute value is present
+       const blinklink = page.locator("[href*='request']")
+       //check this attribute is present
+       await expect(blinklink).toHaveAttribute('class','blinkingText')
+    
+        })      
+
+     test.only('Fifth case- Page opens in new tab ', async ({browser})=>{
+
+            const context = await browser.newContext()
+            const page = await browser.newPage()
+            var url ="https://rahulshettyacademy.com/loginpagePractise/";
+            //To launchthe URL
+             page.goto(url)
+           const documentLink = page.locator("[href*='request']")
+           //check this attribute is present
+           await expect(documentLink).toHaveAttribute('class','blinkingText')
+           // when we are redirecting new page, we need to inform prior
+           const [newPage] = await Promise.all(
+            [          
+            context.waitForEvent('page'),        
+            documentLink.click(),    
+            ]) 
+            var newTitle = "RS Academy"
+            await expect(newPage).toHaveTitle(newTitle)
+            var textval = "Please email us at mentor@rahulshettyacademy.com with below template to receive response";
+            const textelment = await newPage.locator("class*='red'").textContent(); 
+            console.log(textval)
+            await expect(textelment).toHaveText(textval)
+     })  
+     
+     test('Child window handling', async ({ browser }) => {    
+
+        const context = await browser.newContext();    
+        
+        const page = await context.newPage();    
+        
+        page.goto("https://rahulshettyacademy.com/loginpagePractise/");    
+        
+        const documentLink = page.locator("[href*='documents-request']");    
+        
+        const Username1 = page.locator("#username");     
+        
+        const [newPage] = await Promise.all(
+        
+        [          
+        
+        context.waitForEvent('page'),        
+        
+        documentLink.click(),    
+        
+        ])    
+        
+        const text = await newPage.locator("[class*='red']").textContent();    
+        
+        console.log(text);    
+        
+        const arraytext = text.split("@");    
+        
+        const domain = arraytext[1].split(" ")[0];    
+        
+        console.log(domain);    
+        
+        await Username1.type(domain);    
+        
+        console.log(await Username1.textContent());
+        
+        })
