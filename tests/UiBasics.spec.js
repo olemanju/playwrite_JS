@@ -169,7 +169,7 @@ test('Third test case to print all the links', async ({page})=>{
     
         })      
 
-     test.only('Fifth case- Page opens in new tab ', async ({browser})=>{
+     test('Fifth case- Page opens in new tab ', async ({browser})=>{
 
             const context = await browser.newContext()
             const page = await browser.newPage()
